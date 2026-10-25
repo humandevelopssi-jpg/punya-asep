@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>4. Kompensasi Akhir Masa Kontrak</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#eef2f7;padding:20px;color:#1e293b}
+.dashboard{max-width:1200px;margin:0 auto}
+.main-header{background:linear-gradient(135deg,#0f172a,#1e3a8a);color:#fff;padding:25px 30px;border-radius:14px;margin-bottom:25px;box-shadow:0 10px 25px rgba(0,0,0,.15)}
+.main-header h1{font-size:22px;font-weight:700}
+.main-header p{font-size:14px;opacity:.8;margin-top:5px}
+.data-section{background:#fff;border-radius:14px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+.table-container{overflow-x:auto;margin-bottom:25px;border-radius:8px;border:1px solid #e2e8f0}
+table{width:100%;border-collapse:collapse;text-align:center;font-size:13px}
+thead th{padding:12px 8px;font-weight:700;font-size:11px;text-transform:uppercase;color:#fff;border-right:1px solid rgba(255,255,255,.15)}
+thead th:last-child{border-right:none}
+
+/* Warna Header Tabel disesuaikan dengan Screenshot */
+.h-no{background:#dc2626}
+.h-prog{background:#dc2626}
+.h-bln{background:#dc2626}
+.h-unit{background:#0000ff}
+.h-jml{background:#2563eb}
+.h-tot{background:#b45309}
+.h-ket{background:#b45309}
+.h-tgl{background:#d97706}
+.h-sts{background:#facc15; color:#1e293b}
+
+tbody td{padding:10px 8px;border-bottom:1px solid #e2e8f0;color:#334155;text-align:center; vertical-align:middle;}
+tbody tr:nth-child(even){background:#f8fafc}
+.total-cell{font-weight:800;background:#f1f5f9}
+.status-done{color:#16a34a;font-weight:bold}
+.status-target{color:#dc2626;font-weight:bold}
+
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.chart-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:15px}
+.chart-card h3{font-size:13px;font-weight:700;margin-bottom:15px;color:#475569;text-align:center}
+.canvas-container{position:relative;height:280px}
+
+/* STYLE HIGHLIGHT (TELAH DIRAPIKAN) */
+.highlight-box{background:#f0f9ff;border-left:5px solid #0284c7;border-radius:8px;padding:20px;margin-top:20px;box-shadow:0 4px 10px rgba(0,0,0,.03)}
+.highlight-box h4{font-size:15px;font-weight:800;margin-bottom:15px;color:#1e293b}
+.highlight-content{font-size:13.5px;line-height:1.7;color:#1e293b}
+
+/* Menggunakan CSS Grid agar titik dua (:) sejajar presisi */
+.desc-list{display:grid; grid-template-columns: 170px 10px 1fr; gap: 6px 0; margin-bottom: 15px;}
+.desc-list .num{font-weight:700; text-align:left;}
+.desc-list .colon{text-align:center; font-weight:700;}
+.desc-list .val{text-align:left; text-align:justify;}
+
+.highlight-content b { color: #0f172a; }
+.p-catatan{margin-top:15px; padding-top:15px; border-top:1px dashed #cbd5e1; font-size:12.5px;}
+.p-catatan ul{list-style:none; padding-left:0; margin-top:5px;}
+.p-catatan li{padding-left:15px; position:relative; margin-bottom:6px; font-style:italic; line-height:1.6;}
+.p-catatan li::before{content:'-'; position:absolute; left:0;}
+</style>
+</head>
+<body>
+<div class="dashboard">
+    <div class="main-header">
+        <h1>4. Kompensasi Akhir Masa Kontrak</h1>
+        <p>Update Data: <b>23 Oktober 2026</b> | PT. Swadharma Sarana Informatika</p>
+    </div>
+    <div class="data-section">
+        <div id="dataContent"></div>
+    </div>
+</div>
+
+<script>
+function fNum(num) { return num.toLocaleString('id-ID'); }
+
+// Data Kompensasi Oktober & November
+var kompData = [
+    { no: 1, prog: 'Kompensasi', bln: 'Oktober', unit: 'SSI', org: 45, rp: 333051449, ket: 'Kompensasi Akhir Masa Kontrak September-2026 (MK-1 Th)', tgl: '20/10/2026', status: 'Done' },
+    { no: 2, prog: 'Kompensasi', bln: 'Oktober', unit: 'JST', org: 151, rp: 640799868, ket: 'Kompensasi Akhir Masa Kontrak September (Jeda) - PB (1x Upah)', tgl: '15/10/2026', status: 'Done' },
+    { no: 3, prog: 'Kompensasi', bln: 'Oktober', unit: 'JST', org: 163, rp: 442396646, ket: 'Kompensasi Akhir Masa Kontrak September-2026 (MK-1 Th)', tgl: '20/10/2026', status: 'Done' },
+    { no: 4, prog: 'Kompensasi', bln: 'November', unit: 'SSI', org: 41, rp: 326057511, ket: 'Kompensasi Akhir Masa Kontrak Oktober-2026 (MK-1 Th)', tgl: '20/11/2026', status: 'Target On-Progress' },
+    { no: 5, prog: 'Kompensasi', bln: 'November', unit: 'JST', org: 141, rp: 520846186, ket: 'Kompensasi Akhir Masa Kontrak Oktober (Jeda) - PB (1x Upah)', tgl: '13/11/2026', status: 'Target On-Progress' },
+    { no: 6, prog: 'Kompensasi', bln: 'November', unit: 'JST', org: 10, rp: 52018189, ket: 'Kompensasi Akhir Masa Kontrak Oktober-2026 (MK-1 Th)', tgl: '20/11/2026', status: 'Target On-Progress' }
+];
+
+var tblKomp = '';
+kompData.forEach(function(r) {
+    var statusClass = (r.status === 'Done') ? 'status-done' : 'status-target';
+    tblKomp += `
+        <tr>
+            <td>${r.no}</td>
+            <td>${r.prog}</td>
+            <td style="font-weight:bold;">${r.bln}</td>
+            <td class="${r.unit==='SSI'?'h-no':'h-unit'}" style="color:white; font-weight:bold;">${r.unit}</td>
+            <td>${fNum(r.org)}</td>
+            <td class="total-cell">${fNum(r.rp)}</td>
+            <td style="text-align:left; font-size:12px;">${r.ket}</td>
+            <td>${r.tgl}</td>
+            <td class="${statusClass}">${r.status}</td>
+        </tr>
+    `;
+});
+
+// Kalkulasi untuk Grafik
+var totOktRp = 333051449 + 640799868 + 442396646;
+var totNovRp = 326057511 + 520846186 + 52018189;
+
+var content = `
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="h-no">NO</th>
+                    <th class="h-prog">PROGRAM</th>
+                    <th class="h-bln">BULAN</th>
+                    <th class="h-unit">UNIT</th>
+                    <th class="h-jml">JML (ORANG)</th>
+                    <th class="h-tot">TOTAL KOMPENSASI (RP)</th>
+                    <th class="h-ket" style="width:30%;">KETERANGAN</th>
+                    <th class="h-tgl">TGL PEMBAYARAN</th>
+                    <th class="h-sts">STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tblKomp}
+            </tbody>
+        </table>
+    </div>
+    <div class="chart-grid">
+        <div class="chart-card"><h3>🍩 Porsi Anggaran Kompensasi (Okt vs Nov)</h3><div class="canvas-container"><canvas id="chartKompensasi"></canvas></div></div>
+        <div class="chart-card"><h3>👥 Jumlah Pegawai Terdampak</h3><div class="canvas-container"><canvas id="chartKompensasiBar"></canvas></div></div>
+    </div>
+    
+    <div class="highlight-box">
+        <h4>📌 Highlight :</h4>
+        <div class="highlight-content">
+            
+            <div class="desc-list">
+                <div class="num">4.1 Pencapaian Oktober (Done)</div>
+                <div class="colon">:</div>
+                <div class="val">Seluruh kewajiban kompensasi untuk periode September 2026 telah <b>100% selesai (Done)</b> dibayarkan. Total realisasi mencapai <b>Rp 1,41 Miliar</b> untuk <b>359 pegawai</b> (SSI & JST).</div>
+                
+                <div class="num">4.2 Estimasi Beban November</div>
+                <div class="colon">:</div>
+                <div class="val">Terdapat estimasi kompensasi untuk periode Oktober 2026 yang masuk dalam <b>Target On-Progress</b>. Total nilai yang perlu disiapkan sebesar <b>Rp 898,9 Juta</b> untuk <b>192 pegawai</b>.</div>
+                
+                <div class="num">4.3 Fokus Eksekusi</div>
+                <div class="colon">:</div>
+                <div class="val">Porsi terbesar beban kompensasi November berasal dari JST (Jeda) senilai Rp 520,8 Juta (141 pegawai) dengan target bayar 13/11/2026.</div>
+            </div>
+
+            <div class="p-catatan">
+                <b>Catatan Penting :</b>
+                <ul>
+                    <li>Terhitung mulai bulan Oktober kompensasi akhir masa kontrak diberikan kepada pegawai sekurang-kurangnya telah memiliki masa kontrak 1 tahun.</li>
+                    <li>Pegawai yang belum memiliki masa kerja 1 tahun maka PKWT-nya dilakukan perpanjangan, namun bilamana pegawai tersebut tidak diperpanjang/resign maka kompensasi diberikan saat akhir masa kontrak jatuh tempo.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+`;
+document.getElementById('dataContent').innerHTML = content;
+
+setTimeout(() => {
+    new Chart(document.getElementById('chartKompensasi'), { 
+        type: 'doughnut', 
+        data: { 
+            labels: ['Oktober (Done)', 'November (Target On-Progress)'], 
+            datasets: [{ data: [totOktRp, totNovRp], backgroundColor: ['#16a34a', '#f59e0b'], borderWidth: 4, borderColor: '#fff' }] 
+        }, 
+        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } } 
+    });
+
+    new Chart(document.getElementById('chartKompensasiBar'), { 
+        type: 'bar', 
+        data: { 
+            labels: ['Oktober', 'November'], 
+            datasets: [
+                { label: 'SSI', data: [45, 41], backgroundColor: '#dc2626', borderRadius: 4 }, 
+                { label: 'JST', data: [151+163, 141+10], backgroundColor: '#2563eb', borderRadius: 4 }
+            ] 
+        }, 
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { x: { stacked: true }, y: { stacked: true } } } 
+    });
+}, 100);
+</script>
+</body>
+</html>

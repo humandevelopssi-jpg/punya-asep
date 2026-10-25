@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>5. PKWT Pegawai</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#eef2f7;padding:20px;color:#1e293b}
+.dashboard{max-width:1200px;margin:0 auto}
+.main-header{background:linear-gradient(135deg,#0f172a,#1e3a8a);color:#fff;padding:25px 30px;border-radius:14px;margin-bottom:25px;box-shadow:0 10px 25px rgba(0,0,0,.15)}
+.main-header h1{font-size:22px;font-weight:700}
+.main-header p{font-size:14px;opacity:.8;margin-top:5px}
+.data-section{background:#fff;border-radius:14px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+.table-container{overflow-x:auto;margin-bottom:25px;border-radius:8px;border:1px solid #e2e8f0}
+table{width:100%;border-collapse:collapse;text-align:center;font-size:13px}
+thead th{padding:12px 8px;font-weight:700;font-size:11px;text-transform:uppercase;color:#fff;border-right:1px solid rgba(255,255,255,.15)}
+thead th:last-child{border-right:none}
+.h-q,.h-tot{background:#dc2626}.h-glo{background:#16a34a}.h-ssi{background:#dc2626}
+tbody td{padding:10px 8px;border-bottom:1px solid #e2e8f0;color:#334155;text-align:center}
+tbody tr:nth-child(even){background:#f8fafc}
+tbody tr:last-child{font-weight:bold; background:#f1f5f9; border-top:2px solid #cbd5e1;}
+.status-done{color:#16a34a;font-weight:bold}
+.status-prog{color:#dc2626;font-weight:bold}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.chart-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:15px}
+.chart-card h3{font-size:13px;font-weight:700;margin-bottom:15px;color:#475569;text-align:center}
+.canvas-container{position:relative;height:280px}
+
+/* STYLE HIGHLIGHT (TELAH DIRAPIKAN) */
+.highlight-box{background:#f0fdf4;border-left:5px solid #16a34a;border-radius:8px;padding:20px;margin-top:20px;box-shadow:0 4px 10px rgba(0,0,0,.03)}
+.highlight-box h4{font-size:15px;font-weight:800;margin-bottom:15px;color:#1e293b}
+.highlight-content{font-size:13.5px;line-height:1.7;color:#1e293b}
+
+/* Menggunakan CSS Grid agar titik dua (:) sejajar presisi */
+.desc-list{display:grid; grid-template-columns: 170px 10px 1fr; gap: 8px 0; margin-bottom: 5px;}
+.desc-list .num{font-weight:700; text-align:left;}
+.desc-list .colon{text-align:center; font-weight:700;}
+.desc-list .val{text-align:left; text-align:justify;}
+
+.highlight-content b { color: #0f172a; }
+</style>
+</head>
+<body>
+<div class="dashboard">
+    <!-- HEADER SESUAI INSTRUKSI -->
+    <div class="main-header">
+        <h1>5. PKWT Pegawai</h1>
+        <p>Update per <b>23 Oktober 2026</b> | PT. Swadharma Sarana Informatika</p>
+    </div>
+    <div class="data-section">
+        <div id="dataContent"></div>
+    </div>
+</div>
+
+<script>
+// Data di-update menjadi 100% Done (On-Progress = 0)
+var pkwtData = [
+    { reg:'REG-1', total:128, done:128, prog:0, pDone:'100%', pProg:'0%' },
+    { reg:'REG-2', total:166, done:166, prog:0, pDone:'100%', pProg:'0%' },
+    { reg:'REG-3', total:363, done:363, prog:0, pDone:'100%', pProg:'0%' },
+    { reg:'REG-4', total:116, done:116, prog:0, pDone:'100%', pProg:'0%' },
+    { reg:'REG-5', total:72,  done:72,  prog:0, pDone:'100%', pProg:'0%' },
+    { reg:'REG-6', total:130, done:130, prog:0, pDone:'100%', pProg:'0%' },
+    { reg:'REG-7', total:112, done:112, prog:0, pDone:'100%', pProg:'0%' },
+    { reg:'REG-8', total:163, done:163, prog:0, pDone:'100%', pProg:'0%' },
+    { reg:'REG-9', total:62,  done:62,  prog:0, pDone:'100%', pProg:'0%' },
+    { reg:'REG-10',total:90,  done:90,  prog:0, pDone:'100%', pProg:'0%' }
+];
+
+var tblPkwt = '';
+pkwtData.forEach(function(r) {
+    tblPkwt += `<tr>
+        <td style="font-weight:bold;">${r.reg}</td>
+        <td>${r.total}</td>
+        <td class="status-done">${r.done}</td>
+        <td class="status-done">${r.pDone}</td>
+        <td style="color:#94a3b8;">${r.prog}</td>
+        <td style="color:#94a3b8;">${r.pProg}</td>
+    </tr>`;
+});
+
+var content = `
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="h-q" rowspan="2">Region</th>
+                    <th class="h-tot" rowspan="2">Total Oktober 2026</th>
+                    <th class="h-glo" colspan="2">DONE</th>
+                    <th class="h-ssi" colspan="2">ON-PROGRESS</th>
+                </tr>
+                <tr>
+                    <th class="h-glo">SSI/JST</th>
+                    <th class="h-glo">SSI/JST</th>
+                    <th class="h-ssi">SSI/JST</th>
+                    <th class="h-ssi">SSI/JST</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tblPkwt}
+                <tr>
+                    <td>TOTAL</td>
+                    <td>1.402</td>
+                    <td class="status-done">1.402</td>
+                    <td class="status-done">100%</td>
+                    <td style="color:#94a3b8;">0</td>
+                    <td style="color:#94a3b8;">0%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="chart-grid">
+        <div class="chart-card"><h3>🍩 Rasio Penyelesaian PKWT</h3><div class="canvas-container"><canvas id="chartPkwt"></canvas></div></div>
+        <div class="chart-card"><h3>📊 Status PKWT Per Region</h3><div class="canvas-container"><canvas id="chartPkwtBar"></canvas></div></div>
+    </div>
+    
+    <!-- HIGHLIGHT TELAH DIRAPIKAN & TO DO DIHAPUS -->
+    <div class="highlight-box">
+        <h4>✅ Highlight (Status: COMPLETED) :</h4>
+        <div class="highlight-content">
+            <div class="desc-list">
+                <div class="num">5.1 Capaian Keseluruhan</div>
+                <div class="colon">:</div>
+                <div class="val"><b>Luar biasa!</b> Seluruh proses PKWT untuk <b>1.402 pegawai</b> telah <b>100% selesai (DONE)</b> dan ditandatangani oleh masing-masing pegawai. Tidak ada lagi sisa pekerjaan yang berstatus <i>On-Progress</i>.</div>
+                
+                <div class="num">5.2 Pemerataan Region</div>
+                <div class="colon">:</div>
+                <div class="val">Seluruh 10 Region (REG-1 s.d REG-10) berhasil menuntaskan targetnya masing-masing dengan persentase <b>100% Done</b>.</div>
+                
+                <div class="num">5.3 Dampak Positif</div>
+                <div class="colon">:</div>
+                <div class="val">Penyelesaian ini menutup potensi temuan administrasi di akhir bulan dan memastikan seluruh hak serta kewajiban hukum terkait masa kerja telah terpenuhi dengan rapi.</div>
+            </div>
+        </div>
+    </div>
+`;
+document.getElementById('dataContent').innerHTML = content;
+
+setTimeout(() => {
+    new Chart(document.getElementById('chartPkwt'), { 
+        type: 'doughnut', 
+        data: { labels: ['Done (1.402)', 'On-Progress (0)'], datasets: [{ data: [1402, 0], backgroundColor: ['#16a34a', '#dc2626'], borderWidth: 4, borderColor: '#fff' }] }, 
+        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } } 
+    });
+
+    new Chart(document.getElementById('chartPkwtBar'), { 
+        type: 'bar', 
+        data: { 
+            labels: pkwtData.map(d=>d.reg), 
+            datasets: [
+                { label: 'Done', data: pkwtData.map(d=>d.done), backgroundColor: '#16a34a', borderRadius: 4 }, 
+                { label: 'On-Progress', data: pkwtData.map(d=>d.prog), backgroundColor: '#dc2626', borderRadius: 4 }
+            ] 
+        }, 
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { x: { stacked: true }, y: { stacked: true } } } 
+    });
+}, 100);
+</script>
+</body>
+</html>
